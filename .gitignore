@@ -144,7 +144,6 @@ my-*
 ecosystem.config.js
 
 # db
-pocketbase.exe
 store.db
 pb_data/logs.db*
 pb_data/data.db-*
