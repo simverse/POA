@@ -65,7 +65,8 @@ whitelist = [
     "52.32.178.7",
     "127.0.0.1",
 ]
-whitelist = whitelist + settings.WHITELIST
+if settings.WHITELIST is not None:
+    whitelist = whitelist + settings.WHITELIST
 
 
 # @app.middleware("http")

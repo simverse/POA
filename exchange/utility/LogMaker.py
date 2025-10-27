@@ -7,6 +7,7 @@ from loguru import logger
 from devtools import debug, pformat
 import traceback
 import os
+from typing import Union
 
 logger.remove(0)
 logger.add(
@@ -202,7 +203,7 @@ def log_error_message(error, name):
     log_message(embed=embed)
 
 
-def log_order_error_message(error: str | Exception, order_info: MarketOrder):
+def log_order_error_message(error: Union[str, Exception], order_info: MarketOrder):
     if isinstance(error, Exception):
         error = get_error(error)
 

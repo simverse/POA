@@ -11,7 +11,7 @@ from .okx import Okx
 from .stock import KoreaInvestment
 from exchange.utility import settings, log_message
 from .database import db
-from typing import Literal
+from typing import Literal, Optional, Union
 import pendulum
 import time
 from devtools import debug
@@ -22,15 +22,15 @@ from .model import CRYPTO_EXCHANGES, STOCK_EXCHANGES, MarketOrder
 
 
 class Exchange(BaseModel):
-    UPBIT: Upbit | None = None
-    BINANCE: Binance | None = None
-    BYBIT: Bybit | None = None
-    BITGET: Bitget | None = None
-    OKX: Okx | None = None
-    KIS1: KoreaInvestment | None = None
-    KIS2: KoreaInvestment | None = None
-    KIS3: KoreaInvestment | None = None
-    KIS4: KoreaInvestment | None = None
+    UPBIT: Optional[Upbit] = None
+    BINANCE: Optional[Binance] = None
+    BYBIT: Optional[Bybit] = None
+    BITGET: Optional[Bitget] = None
+    OKX: Optional[Okx] = None
+    KIS1: Optional[KoreaInvestment] = None
+    KIS2: Optional[KoreaInvestment] = None
+    KIS3: Optional[KoreaInvestment] = None
+    KIS4: Optional[KoreaInvestment] = None
 
     class Config:
         arbitrary_types_allowed = True
@@ -79,7 +79,7 @@ def get_bot(
         "BINANCE", "UPBIT", "BYBIT", "BITGET", "KRX", "NASDAQ", "NYSE", "AMEX", "OKX"
     ],
     kis_number=None,
-) -> Binance | Upbit | Bybit | Bitget | KoreaInvestment | Okx:
+) -> Union[Binance, Upbit, Bybit, Bitget, KoreaInvestment, Okx]:
     exchange_name = exchange_name.upper()
     if exchange_name in CRYPTO_EXCHANGES:
         return get_exchange(exchange_name, kis_number).dict()[exchange_name]
@@ -126,7 +126,7 @@ def retry(
     order_info: MarketOrder,
     max_attempts=5,
     delay=1,
-    instance: Binance | Bybit | Bitget | Upbit | Okx = None,
+    instance: Optional[Union[Binance, Bybit, Bitget, Upbit, Okx]] = None,
 ):
     attempts = 0
 

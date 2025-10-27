@@ -2,6 +2,7 @@ import sqlite3
 import traceback
 import os
 from pathlib import Path
+from typing import Union
 
 current_file_direcotry = os.path.dirname(os.path.realpath(__file__))
 parent_directory = Path(current_file_direcotry).parent
@@ -23,19 +24,19 @@ class Database:
     def close(self):
         self.con.close()
 
-    def excute(self, query: str, value: dict | tuple):
+    def excute(self, query: str, value: Union[dict, tuple]):
         self.cursor.execute(query, value)
         self.con.commit()
 
-    def excute_many(self, query: str, values: list[dict | tuple]):
+    def excute_many(self, query: str, values: list[Union[dict, tuple]]):
         self.cursor.executemany(query, values)
         self.con.commit()
 
-    def fetch_one(self, query: str, value: dict | tuple):
+    def fetch_one(self, query: str, value: Union[dict, tuple]):
         self.cursor.execute(query, value)
         return self.cursor.fetchone()
 
-    def fetch_all(self, query: str, value: dict | tuple):
+    def fetch_all(self, query: str, value: Union[dict, tuple]):
         self.cursor.execute(query, value)
         return self.cursor.fetchall()
 

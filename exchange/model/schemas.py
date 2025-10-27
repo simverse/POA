@@ -1,5 +1,5 @@
 from pydantic import BaseModel, BaseSettings, validator, root_validator
-from typing import Literal
+from typing import Literal, Union, Optional
 import os
 from pathlib import Path
 from enum import Enum
@@ -87,37 +87,37 @@ crypto_futures_code = ("PERP", ".P")
 
 class Settings(BaseSettings):
     PASSWORD: str
-    WHITELIST: list[str] | None = None
-    PORT: int | None = None
-    DISCORD_WEBHOOK_URL: str | None = None
-    UPBIT_KEY: str | None = None
-    UPBIT_SECRET: str | None = None
-    BINANCE_KEY: str | None = None
-    BINANCE_SECRET: str | None = None
-    BYBIT_KEY: str | None = None
-    BYBIT_SECRET: str | None = None
-    BITGET_KEY: str | None = None
-    BITGET_SECRET: str | None = None
-    BITGET_PASSPHRASE: str | None = None
-    OKX_KEY: str | None = None
-    OKX_SECRET: str | None = None
-    OKX_PASSPHRASE: str | None = None
-    KIS1_ACCOUNT_NUMBER: str | None = None
-    KIS1_ACCOUNT_CODE: str | None = None
-    KIS1_KEY: str | None = None
-    KIS1_SECRET: str | None = None
-    KIS2_ACCOUNT_NUMBER: str | None = None
-    KIS2_ACCOUNT_CODE: str | None = None
-    KIS2_KEY: str | None = None
-    KIS2_SECRET: str | None = None
-    KIS3_ACCOUNT_NUMBER: str | None = None
-    KIS3_ACCOUNT_CODE: str | None = None
-    KIS3_KEY: str | None = None
-    KIS3_SECRET: str | None = None
-    KIS4_ACCOUNT_NUMBER: str | None = None
-    KIS4_ACCOUNT_CODE: str | None = None
-    KIS4_KEY: str | None = None
-    KIS4_SECRET: str | None = None
+    WHITELIST: Optional[list[str]] = None
+    PORT: Optional[int] = None
+    DISCORD_WEBHOOK_URL: Optional[str] = None
+    UPBIT_KEY: Optional[str] = None
+    UPBIT_SECRET: Optional[str] = None
+    BINANCE_KEY: Optional[str] = None
+    BINANCE_SECRET: Optional[str] = None
+    BYBIT_KEY: Optional[str] = None
+    BYBIT_SECRET: Optional[str] = None
+    BITGET_KEY: Optional[str] = None
+    BITGET_SECRET: Optional[str] = None
+    BITGET_PASSPHRASE: Optional[str] = None
+    OKX_KEY: Optional[str] = None
+    OKX_SECRET: Optional[str] = None
+    OKX_PASSPHRASE: Optional[str] = None
+    KIS1_ACCOUNT_NUMBER: Optional[str] = None
+    KIS1_ACCOUNT_CODE: Optional[str] = None
+    KIS1_KEY: Optional[str] = None
+    KIS1_SECRET: Optional[str] = None
+    KIS2_ACCOUNT_NUMBER: Optional[str] = None
+    KIS2_ACCOUNT_CODE: Optional[str] = None
+    KIS2_KEY: Optional[str] = None
+    KIS2_SECRET: Optional[str] = None
+    KIS3_ACCOUNT_NUMBER: Optional[str] = None
+    KIS3_ACCOUNT_CODE: Optional[str] = None
+    KIS3_KEY: Optional[str] = None
+    KIS3_SECRET: Optional[str] = None
+    KIS4_ACCOUNT_NUMBER: Optional[str] = None
+    KIS4_ACCOUNT_CODE: Optional[str] = None
+    KIS4_KEY: Optional[str] = None
+    KIS4_SECRET: Optional[str] = None
     DB_ID: str = "poa@admin.com"
     DB_PASSWORD: str = "poabot!@#$"
 
@@ -190,31 +190,31 @@ class OrderRequest(BaseModel):
     # QUOTE
     type: Literal["market", "limit"] = "market"
     side: SIDE_LITERAL
-    amount: float | None = None
-    price: float | None = None
-    cost: float | None = None
-    percent: float | None = None
-    amount_by_percent: float | None = None
-    leverage: int | None = None
-    stop_price: float | None = None
-    profit_price: float | None = None
+    amount: Optional[float] = None
+    price: Optional[float] = None
+    cost: Optional[float] = None
+    percent: Optional[float] = None
+    amount_by_percent: Optional[float] = None
+    leverage: Optional[int] = None
+    stop_price: Optional[float] = None
+    profit_price: Optional[float] = None
     order_name: str = "주문"
-    kis_number: int | None = 1
-    hedge: str | None = None
-    unified_symbol: str | None = None
-    is_crypto: bool | None = None
-    is_stock: bool | None = None
-    is_spot: bool | None = None
-    is_futures: bool | None = None
-    is_coinm: bool | None = None
-    is_entry: bool | None = None
-    is_close: bool | None = None
-    is_buy: bool | None = None
-    is_sell: bool | None = None
-    is_total: bool | None = None
-    is_contract: bool | None = None
-    contract_size: float | None = None
-    margin_mode: str | None = None
+    kis_number: Optional[int] = 1
+    hedge: Optional[str] = None
+    unified_symbol: Optional[str] = None
+    is_crypto: Optional[bool] = None
+    is_stock: Optional[bool] = None
+    is_spot: Optional[bool] = None
+    is_futures: Optional[bool] = None
+    is_coinm: Optional[bool] = None
+    is_entry: Optional[bool] = None
+    is_close: Optional[bool] = None
+    is_buy: Optional[bool] = None
+    is_sell: Optional[bool] = None
+    is_total: Optional[bool] = None
+    is_contract: Optional[bool] = None
+    contract_size: Optional[float] = None
+    margin_mode: Optional[str] = None
 
     class Config:
         use_enum_values = True
@@ -264,7 +264,7 @@ class OrderBase(OrderRequest):
 
 
 class MarketOrder(OrderBase):
-    price: float | None = None
+    price: Optional[float] = None
     type: Literal["market"] = "market"
 
 
@@ -272,9 +272,9 @@ class PriceRequest(BaseModel):
     exchange: EXCHANGE_LITERAL
     base: str
     quote: QUOTE_LITERAL
-    is_crypto: bool | None = None
-    is_stock: bool | None = None
-    is_futures: bool | None = None
+    is_crypto: Optional[bool] = None
+    is_stock: Optional[bool] = None
+    is_futures: Optional[bool] = None
 
     @root_validator(pre=True)
     def root_validate(cls, values):
@@ -311,8 +311,8 @@ class HedgeData(BaseModel):
     exchange: Literal["BINANCE"]
     base: str
     quote: QUOTE_LITERAL = "USDT.P"
-    amount: float | None = None
-    leverage: int | None = None
+    amount: Optional[float] = None
+    leverage: Optional[int] = None
     hedge: str
 
     @validator("password")
