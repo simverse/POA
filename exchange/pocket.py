@@ -11,9 +11,16 @@ def auth():
     try:
         DB_ID = settings.DB_ID
         DB_PASSWORD = settings.DB_PASSWORD
-        pb.admins.auth_with_password(DB_ID, DB_PASSWORD)
+        # 새 버전 PocketBase API 사용
+        pb.collection("_superusers").auth_with_password(DB_ID, DB_PASSWORD)
     except Exception as e:
-        raise Exception("DB auth error")
+        try:
+            # 이전 버전 API 시도
+            pb.admins.auth_with_password(DB_ID, DB_PASSWORD)
+        except Exception as e2:
+            print(f"PocketBase 연결 실패: {e2}")
+            # PocketBase 연결 실패시 무시하고 계속 진행
+            pass
 
 
 def reauth():
@@ -25,7 +32,8 @@ def reauth():
         if current_time > expire_time:
             auth()
     except:
-        raise Exception("DB reauth error")
+        print("PocketBase 재인증 실패")
+        pass
 
 
 def create(collection, data):
@@ -33,7 +41,8 @@ def create(collection, data):
         reauth()
         pb.collection(collection).create(data)
     except:
-        raise Exception("DB create error")
+        print("PocketBase create 실패")
+        pass
 
 
 def delete(collection, id):
