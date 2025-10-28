@@ -1,5 +1,5 @@
 PyJWT==2.7.0
-ccxt==4.4.20
+ccxt==4.5.13
 dhooks==1.1.4
 fastapi==0.99.0
 uvicorn[standard]==0.22.0

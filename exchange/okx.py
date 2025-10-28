@@ -117,14 +117,26 @@ class Okx:
             raise error.AmountPercentBothError()
         elif order_info.amount is not None:
             if order_info.is_contract:
-                result = self.client.amount_to_precision(
-                    order_info.unified_symbol,
-                    float(
-                        Decimal(str(order_info.amount))
-                        // Decimal(str(order_info.contract_size))
-                    ),
-                )
-
+                if order_info.is_coinm:
+                    current_price = self.get_price(order_info.unified_symbol)
+                    if current_price == 0:
+                        raise error.PriceNoneError()
+                    
+                    # 코인M 거래의 경우, TradingView에서 amount 값이 코인의 수량으로 발송됨. (e.g., BTC).
+                    # Convert base currency quantity to total fiat value, then divide by contract_size (fiat value per contract) to get number of contracts.
+                    contracts = (Decimal(str(order_info.amount)) * Decimal(str(current_price))) // Decimal(str(order_info.contract_size))
+                    result = self.client.amount_to_precision(
+                        order_info.unified_symbol,
+                        float(contracts)
+                    )
+                else:
+                    result = self.client.amount_to_precision(
+                        order_info.unified_symbol,
+                        float(
+                            Decimal(str(order_info.amount))
+                            // Decimal(str(order_info.contract_size))
+                        ),
+                    )
             else:
                 result = order_info.amount
         elif order_info.percent is not None:

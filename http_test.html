@@ -10,7 +10,8 @@
         .container { max-width: 800px; margin: auto; }
         .form-section { background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
         label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select { width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ddd; box-sizing: border-box; }
+        input, select, textarea { width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ddd; box-sizing: border-box; }
+        textarea { min-height: 150px; font-family: monospace; }
         button { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
         button:hover { background-color: #0056b3; }
         pre { background: #333; color: #fff; padding: 15px; border-radius: 5px; white-space: pre-wrap; word-wrap: break-word; }
@@ -24,6 +25,37 @@
             <label for="apiBaseUrl">API Server Base URL:</label>
             <input type="text" id="apiBaseUrl" value="http://localhost:8000">
         </div>
+
+        <!-- Raw JSON Request Tester -->
+        <div class="form-section">
+            <h2>JSON 직접 요청 테스터</h2>
+            <form id="rawJsonForm">
+                <label for="rawJsonEndpoint">Endpoint:</label>
+                <select id="rawJsonEndpoint">
+                    <option value="/">/</option>
+                    <option value="/order">/order</option>
+                    <option value="/hedge">/hedge</option>
+                    <option value="/price">/price</option>
+                </select>
+
+                <label for="rawJsonPayload">JSON Payload:</label>
+                <textarea id="rawJsonPayload">{
+    "password": "YOUR_PASSWORD",
+    "exchange": "BINANCE",
+    "base": "BTC",
+    "quote": "USDT",
+    "side": "buy",
+    "amount": 0.001
+}</textarea>
+
+                <button type="submit">Send Raw JSON</button>
+            </form>
+            <h3>Response:</h3>
+            <pre id="rawJsonResponse">...</pre>
+        </div>
+
+        <hr>
+        <h2>개별 파라미터 테스터</h2>
 
         <!-- /order Endpoint -->
         <div class="form-section">
@@ -160,6 +192,21 @@
         }
 
         // Form submit handlers
+        document.getElementById('rawJsonForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const endpoint = this.rawJsonEndpoint.value;
+            const payloadText = this.rawJsonPayload.value;
+            const responseElement = document.getElementById('rawJsonResponse');
+            
+            try {
+                const data = JSON.parse(payloadText);
+                postData(endpoint, data, 'rawJsonResponse');
+            } catch (error) {
+                console.error('JSON Parse Error:', error);
+                responseElement.textContent = 'JSON Parse Error: ' + error.message;
+            }
+        });
+
         document.getElementById('orderForm').addEventListener('submit', function (e) {
             e.preventDefault();
             const data = {
@@ -171,7 +218,6 @@
                 amount: this.order_amount.value ? parseFloat(this.order_amount.value) : null,
                 cost: this.order_cost.value ? parseFloat(this.order_cost.value) : null,
             };
-            // Filter out null values
             const filteredData = Object.fromEntries(Object.entries(data).filter(([_, v]) => v != null));
             postData('/order', filteredData, 'orderResponse');
         });
