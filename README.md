@@ -42,5 +42,6 @@ _발생하는 문제에 대한 모든 책임은 본인에게 있습니다._
 
 > [fastapi](https://github.com/tiangolo/fastapi) , [ccxt](https://github.com/ccxt/ccxt) , [uvicorn](https://github.com/encode/uvicorn)
 
-
+# 본작업은 장도강님께서 개발하신 POA Bot 소스를 fork하여 작업하였습니다. 
+- https://github.com/jangdokang/POA 
 ----------
