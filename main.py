@@ -3,7 +3,7 @@ from fastapi.exception_handlers import (
 )
 from pprint import pprint
 from fastapi import FastAPI, Request, status, BackgroundTasks
-from fastapi.responses import ORJSONResponse, RedirectResponse
+from fastapi.responses import ORJSONResponse, RedirectResponse, HTMLResponse
 from fastapi.exceptions import RequestValidationError
 import httpx
 from exchange.stock.kis import KoreaInvestment
@@ -25,6 +25,7 @@ from exchange import get_exchange, log_message, db, settings, get_bot, pocket
 import ipaddress
 import os
 import sys
+import socket
 from devtools import debug
 
 VERSION = "0.1.8"
@@ -50,11 +51,31 @@ def get_error(e):
 
 @app.on_event("startup")
 async def startup():
-    log_message(f"POABOT 실행 완료! - 버전:{VERSION}")
+    host = getattr(app.state, "host", "0.0.0.0")
+    port = getattr(app.state, "port", 8000)
+    
+    server_ip = host
+    if host == "0.0.0.0":
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            server_ip = s.getsockname()[0]
+        except Exception:
+            server_ip = "127.0.0.1"
+        finally:
+            s.close()
+    
+    app.state.server_ip = server_ip
+    app.state.port = port
+
+    log_message(f"POABOT 실행 시작! - 버전:{VERSION} (http://{server_ip}:{port})")
 
 
 @app.on_event("shutdown")
 async def shutdown():
+    server_ip = getattr(app.state, "server_ip", "localhost")
+    port = getattr(app.state, "port", "8000")
+    log_message(f"POABOT 실행 종료! (http://{server_ip}:{port})")
     db.close()
 
 
@@ -309,8 +330,7 @@ async def hedge(hedge_data: HedgeData, background_tasks: BackgroundTasks):
     elif hedge == "OFF":
         try:
             records = pocket.get_full_list(
-                "kimp", query_params={"filter": f'base = "{base}"'}
-            )
+                "kimp", query_params={"filter": f'base = "{base}"'} )
             binance_amount = 0.0
             binance_records_id = []
             upbit_amount = 0.0
@@ -363,3 +383,8 @@ async def hedge(hedge_data: HedgeData, background_tasks: BackgroundTasks):
             return {"result": "error"}
         else:
             return {"result": "success"}
+
+@app.get("/test", response_class=HTMLResponse)
+async def get_test_page():
+    with open("http_test.html", "r", encoding="utf-8") as f:
+        return f.read()

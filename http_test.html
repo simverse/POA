@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Endpoint Tester</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; padding: 20px; }
+        h1, h2 { border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .container { max-width: 800px; margin: auto; }
+        .form-section { background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 4px; border: 1px solid #ddd; box-sizing: border-box; }
+        button { background-color: #007bff; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        pre { background: #333; color: #fff; padding: 15px; border-radius: 5px; white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>API Endpoint Tester</h1>
+
+        <div class="form-section">
+            <label for="apiBaseUrl">API Server Base URL:</label>
+            <input type="text" id="apiBaseUrl" value="http://localhost:8000">
+        </div>
+
+        <!-- /order Endpoint -->
+        <div class="form-section">
+            <h2>/order (MarketOrder)</h2>
+            <form id="orderForm">
+                <label for="order_password">Password:</label>
+                <input type="password" id="order_password" required>
+                
+                <label for="order_exchange">Exchange:</label>
+                <select id="order_exchange">
+                    <option value="BINANCE">BINANCE</option>
+                    <option value="UPBIT">UPBIT</option>
+                    <option value="BYBIT">BYBIT</option>
+                    <option value="BITGET">BITGET</option>
+                    <option value="OKX">OKX</option>
+                    <option value="KRX">KRX</option>
+                </select>
+
+                <label for="order_base">Base Asset (e.g., BTC):</label>
+                <input type="text" id="order_base" value="BTC" required>
+
+                <label for="order_quote">Quote Asset:</label>
+                <select id="order_quote">
+                    <option value="USDT">USDT</option>
+                    <option value="USDT.P">USDT.P</option>
+                    <option value="KRW">KRW</option>
+                    <option value="BUSD">BUSD</option>
+                </select>
+
+                <label for="order_side">Side:</label>
+                <select id="order_side">
+                    <option value="buy">buy</option>
+                    <option value="sell">sell</option>
+                    <option value="entry/buy">entry/buy</option>
+                    <option value="entry/sell">entry/sell</option>
+                    <option value="close/buy">close/buy</option>
+                    <option value="close/sell">close/sell</option>
+                </select>
+
+                <label for="order_amount">Amount (Optional):</label>
+                <input type="number" id="order_amount" step="any" placeholder="e.g., 0.01">
+
+                <label for="order_cost">Cost (Optional):</label>
+                <input type="number" id="order_cost" step="any" placeholder="e.g., 10000">
+                
+                <button type="submit">Send to /order</button>
+            </form>
+            <h3>Response:</h3>
+            <pre id="orderResponse">...</pre>
+        </div>
+
+        <!-- /hedge Endpoint -->
+        <div class="form-section">
+            <h2>/hedge (HedgeData)</h2>
+            <form id="hedgeForm">
+                <label for="hedge_password">Password:</label>
+                <input type="password" id="hedge_password" required>
+
+                <label for="hedge_exchange">Exchange:</label>
+                <input type="text" id="hedge_exchange" value="BINANCE" readonly>
+
+                <label for="hedge_base">Base Asset (e.g., BTC):</label>
+                <input type="text" id="hedge_base" value="BTC" required>
+                
+                <label for="hedge_hedge">Hedge (ON/OFF):</label>
+                <select id="hedge_hedge">
+                    <option value="ON">ON</option>
+                    <option value="OFF">OFF</option>
+                </select>
+
+                <label for="hedge_amount">Amount (Optional):</label>
+                <input type="number" id="hedge_amount" step="any" placeholder="e.g., 0.1">
+
+                <label for="hedge_leverage">Leverage (Optional):</label>
+                <input type="number" id="hedge_leverage" placeholder="e.g., 10">
+
+                <button type="submit">Send to /hedge</button>
+            </form>
+            <h3>Response:</h3>
+            <pre id="hedgeResponse">...</pre>
+        </div>
+
+        <!-- /price Endpoint -->
+        <div class="form-section">
+            <h2>/price (PriceRequest)</h2>
+            <form id="priceForm">
+                <label for="price_exchange">Exchange:</label>
+                <select id="price_exchange">
+                    <option value="BINANCE">BINANCE</option>
+                    <option value="UPBIT">UPBIT</option>
+                    <option value="BYBIT">BYBIT</option>
+                    <option value="BITGET">BITGET</option>
+                    <option value="OKX">OKX</option>
+                </select>
+
+                <label for="price_base">Base Asset (e.g., BTC):</label>
+                <input type="text" id="price_base" value="BTC" required>
+
+                <label for="price_quote">Quote Asset:</label>
+                <select id="price_quote">
+                    <option value="USDT">USDT</option>
+                    <option value="USDT.P">USDT.P</option>
+                    <option value="KRW">KRW</option>
+                </select>
+                <button type="submit">Send to /price</button>
+            </form>
+            <h3>Response:</h3>
+            <pre id="priceResponse">...</pre>
+        </div>
+    </div>
+
+    <script>
+        async function postData(urlPath = '', data = {}, responseElementId) {
+            const responseElement = document.getElementById(responseElementId);
+            const apiBaseUrl = document.getElementById('apiBaseUrl').value;
+            const fullUrl = apiBaseUrl + urlPath;
+
+            try {
+                const response = await fetch(fullUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+
+                const result = await response.json();
+                responseElement.textContent = JSON.stringify(result, null, 2);
+
+            } catch (error) {
+                console.error('Error:', error);
+                responseElement.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Form submit handlers
+        document.getElementById('orderForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const data = {
+                password: this.order_password.value,
+                exchange: this.order_exchange.value,
+                base: this.order_base.value,
+                quote: this.order_quote.value,
+                side: this.order_side.value,
+                amount: this.order_amount.value ? parseFloat(this.order_amount.value) : null,
+                cost: this.order_cost.value ? parseFloat(this.order_cost.value) : null,
+            };
+            // Filter out null values
+            const filteredData = Object.fromEntries(Object.entries(data).filter(([_, v]) => v != null));
+            postData('/order', filteredData, 'orderResponse');
+        });
+
+        document.getElementById('hedgeForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const data = {
+                password: this.hedge_password.value,
+                exchange: this.hedge_exchange.value,
+                base: this.hedge_base.value,
+                hedge: this.hedge_hedge.value,
+                amount: this.hedge_amount.value ? parseFloat(this.hedge_amount.value) : null,
+                leverage: this.hedge_leverage.value ? parseInt(this.hedge_leverage.value) : null,
+            };
+            const filteredData = Object.fromEntries(Object.entries(data).filter(([_, v]) => v != null));
+            postData('/hedge', filteredData, 'hedgeResponse');
+        });
+
+        document.getElementById('priceForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const data = {
+                exchange: this.price_exchange.value,
+                base: this.price_base.value,
+                quote: this.price_quote.value,
+            };
+            postData('/price', data, 'priceResponse');
+        });
+    </script>
+</body>
+</html>
