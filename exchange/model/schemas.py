@@ -102,6 +102,7 @@ class Settings(BaseSettings):
     OKX_KEY: Optional[str] = None
     OKX_SECRET: Optional[str] = None
     OKX_PASSPHRASE: Optional[str] = None
+    OKX_SANDBOX_MODE: bool = False
     KIS1_ACCOUNT_NUMBER: Optional[str] = None
     KIS1_ACCOUNT_CODE: Optional[str] = None
     KIS1_KEY: Optional[str] = None

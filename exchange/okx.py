@@ -1,10 +1,11 @@
-import ccxt
+﻿import ccxt
 import ccxt.async_support as ccxt_async
 from devtools import debug
 
 from exchange.model import MarketOrder
 import exchange.error as error
 from decimal import Decimal
+from exchange.utility.setting import settings
 
 
 class Okx:
@@ -16,6 +17,13 @@ class Okx:
                 "password": passphrase,
             }
         )
+        if settings.OKX_SANDBOX_MODE:
+            self.client.headers = {
+                'x-simulated-trading': '1'
+            }
+            self.client.set_sandbox_mode(True)
+
+
         self.client.load_markets()
         self.order_info: MarketOrder = None
         self.position_mode = "one-way"
@@ -112,6 +120,9 @@ class Okx:
         else:
             raise error.PositionNoneError()
 
+    def get_order(self, order_id, symbol):
+        return self.client.fetch_order(order_id, symbol)
+
     def get_amount(self, order_info: MarketOrder) -> float:
         if order_info.amount is not None and order_info.percent is not None:
             raise error.AmountPercentBothError()
@@ -143,15 +154,18 @@ class Okx:
             if self.order_info.is_entry or (order_info.is_spot and order_info.is_buy):
                 if order_info.is_coinm:
                     free_base = self.get_balance(order_info.base)
+
                     if order_info.is_contract:
-                        result = (
-                            free_base * (order_info.percent - 0.5) / 100
-                        ) // order_info.contract_size
+                        current_price = self.get_price(order_info.unified_symbol)
+                        percent_order = order_info.percent - 0.5  if order_info.percent >= 100. else order_info.percent 
+                        intermediate_calc = free_base * current_price * percent_order / 100.
+                        result = intermediate_calc // order_info.contract_size
                     else:
-                        result = free_base * order_info.percent / 100
+                        result = free_base * order_info.percent / 100.
+
                 else:
                     free_quote = self.get_balance(order_info.quote)
-                    cash = free_quote * (order_info.percent - 0.5) / 100
+                    cash = free_quote * (order_info.percent - 0.5) / 100.
                     current_price = self.get_price(order_info.unified_symbol)
                     if order_info.is_contract:
                         result = (cash / current_price) // order_info.contract_size

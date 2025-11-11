@@ -168,19 +168,28 @@ def log_error(error_message, order_info):
 async def order(order_info: MarketOrder, background_tasks: BackgroundTasks):
     order_result = None
     try:
+        import time
         exchange_name = order_info.exchange
         bot = get_bot(exchange_name, order_info.kis_number)
         bot.init_info(order_info)
 
         if bot.order_info.is_crypto:
             if bot.order_info.is_entry:
-                order_result = bot.market_entry(bot.order_info)
+                initial_order_result = bot.market_entry(bot.order_info)
             elif bot.order_info.is_close:
-                order_result = bot.market_close(bot.order_info)
+                initial_order_result = bot.market_close(bot.order_info)
             elif bot.order_info.is_buy:
-                order_result = bot.market_buy(bot.order_info)
+                initial_order_result = bot.market_buy(bot.order_info)
             elif bot.order_info.is_sell:
-                order_result = bot.market_sell(bot.order_info)
+                initial_order_result = bot.market_sell(bot.order_info)
+            
+            time.sleep(1) # Give the order time to fill
+            order_id = initial_order_result.get('id')
+            if order_id:
+                order_result = bot.get_order(order_id, bot.order_info.unified_symbol)
+            else:
+                order_result = initial_order_result
+
             background_tasks.add_task(log, exchange_name, order_result, order_info)
         elif bot.order_info.is_stock:
             order_result = bot.create_order(
