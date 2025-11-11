@@ -158,14 +158,15 @@ class Okx:
                     if order_info.is_contract:
                         current_price = self.get_price(order_info.unified_symbol)
                         percent_order = order_info.percent - 0.5  if order_info.percent >= 100. else order_info.percent 
-                        intermediate_calc = free_base * current_price * percent_order / 100.
+                        intermediate_calc = free_base * current_price * order_info.leverage  * percent_order / 100. 
                         result = intermediate_calc // order_info.contract_size
                     else:
                         result = free_base * order_info.percent / 100.
 
                 else:
                     free_quote = self.get_balance(order_info.quote)
-                    cash = free_quote * (order_info.percent - 0.5) / 100.
+                    percent_order = order_info.percent - 0.5  if order_info.percent >= 100. else order_info.percent 
+                    cash = free_quote * order_info.leverage * percent_order/ 100. 
                     current_price = self.get_price(order_info.unified_symbol)
                     if order_info.is_contract:
                         result = (cash / current_price) // order_info.contract_size
